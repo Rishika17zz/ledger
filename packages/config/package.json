@@ -1,0 +1,16 @@
+{
+  "name": "@ledger/config",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "index.js",
+  "files": [
+    "tsconfig.base.json",
+    "eslint.base.js",
+    "tailwind.tokens.js"
+  ],
+  "dependencies": {
+    "@eslint/js": "^9.13.0",
+    "typescript-eslint": "^8.12.2"
+  }
+}

@@ -1,0 +1,71 @@
+// Ledger database schema.
+//
+// Production target is Postgres. For a zero-config local/dev fallback,
+// swap the two lines below:
+//   provider = "sqlite"
+//   url      = "file:./dev.db"
+// The schema deliberately avoids Postgres-only column types (native enums,
+// arrays, JSONB-specific operators) so it stays valid under either provider
+// without a second schema file. See README "State persistence" section.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  sessions      Session[]
+  watchlistItems WatchlistItem[]
+  snapshots     Snapshot[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// A symbol a user is tracking. Cross-device persistence for the watchlist
+/// itself comes from this table being keyed on userId, not on a device or
+/// browser session.
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  addedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}
+
+/// The core piece of durable state behind "what changed since I last
+/// looked": one row per (user, symbol), overwritten every time that user
+/// views that symbol. Change detection always diffs the live quote against
+/// this row, never against market open or a global timestamp.
+model Snapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  price     Float
+  timestamp DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}

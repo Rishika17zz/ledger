@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+coverage/
+.DS_Store
+Thumbs.db
+packages/database/dev.db
+packages/database/dev.db-journal
+packages/database/generated/
+pnpm-lock.yaml.bak
