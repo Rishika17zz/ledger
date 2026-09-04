@@ -9,6 +9,33 @@ per symbol, every time someone comes back.
 This document is a design memo, not boilerplate. It explains what the
 system does and why, in the order you'd want to interrogate it.
 
+## Quick start (for reviewers)
+
+```bash
+git clone https://github.com/Rishika17zz/ledger.git
+cd ledger
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
+docker compose up --build
+```
+
+Then, once containers are up (first run only):
+
+```bash
+docker compose exec api pnpm --filter @ledger/database migrate:deploy
+docker compose exec api pnpm --filter @ledger/database seed
+```
+
+Open **http://localhost:3000** and log in with the seeded demo account:
+**`demo@ledger.dev`** / **`demo1234`**.
+
+No Docker handy? See §10 ["Running it"](#running-it) for the plain
+`pnpm dev` path (needs Node 20+, pnpm, and either Postgres or the
+zero-config SQLite fallback documented in §8).
+
+Quality gates — `pnpm lint && pnpm typecheck && pnpm test && pnpm build` —
+all run in CI on every push (`.github/workflows/ci.yml`).
+
 ---
 
 ## 1. What counts as a "meaningful change," and why
